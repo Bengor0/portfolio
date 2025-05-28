@@ -4,7 +4,7 @@ import './App.css';
 const API_URL = "https://cheaderthecoder.github.io/5-Letter-words/words.json";
 const WORD_LENGTH = 5;
 const NUM_OF_GUESSES = 6;
-const BASE_COLORS = ["", "", "", "", ""];
+const BASE_COLORS = ["black", "black", "black", "black", "black"];
 
 export default function App() {
   const solution = useRef("");
@@ -59,11 +59,11 @@ export default function App() {
 
     for (let i = 0; i < WORD_LENGTH; i++) {
       if (guess.current[0][i] === solution.current[i]) {
-        colors.push("green flipped");
+        colors.push("green");
         correctCount++;
       } else if (solution.current.includes(guess.current[0][i])) {
-        colors.push("orange flipped");
-      } else colors.push("grey flipped");
+        colors.push("orange");
+      } else colors.push("grey");
     }
 
     if (correctCount === WORD_LENGTH) {
@@ -128,11 +128,19 @@ function Row({ guess }) {
 
   for (let i = 0; i < WORD_LENGTH; i++) {
     let char = guess[0][i];
-    let className = `tile ${guess[1][i]}`;
+    let tileClassName = `tile ${guess[1][i]}`;
+    let spanClassName = `letter ${guess[1][i]}`;
 
     tiles.push(
-      <div className={className} key={i} style={{"--index" : i}}>
-        <span className="letter" style={{"--index" : i}}>{char}</span>
+      <div className={tileClassName} key={i} style={{"--index" : i}}>
+        <div className="tile-inner" style={{"--index" : i}}>
+          <div className="letter black" style={{"--index" : i}}>
+            <span>{char}</span>
+          </div>
+          <div className={spanClassName} style={{"--index" : i}}>
+            <span>{char}</span>
+          </div>
+        </div>
       </div>
     );
   }

@@ -14,45 +14,70 @@
 }
 
 .tile {
+  background-color: transparent;
   display: flex;
+  justify-content: end;
   align-items: center;
-  justify-content: center;
-  border: 2px solid #403c3c;
+  perspective: 1000px;
   width: 50px;
   height: 50px;
-  margin: 3px;
+  margin: 5px;
   font-size: 2em;
   font-weight: 700;
   user-select: none;
+}
+
+.tile-inner {
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.6s ease-in-out;
-  transition-delay: calc(var(--index) * 0.8s);
-
+  transition-delay: calc(var(--index) * 0.4s);
+  transform-style: preserve-3d;
 }
 
-.letter {
-  transition: transform 0.6s ease-in-out;
-}
-
-.tile.flipped > .letter {
-  transition-delay: calc(var(--index) * 0.8s);
-  transform: rotateX(-180deg);
-  
-}
-
-
-.tile.green.flipped {
+.tile.black .tile-inner {
   transform: rotateX(180deg);
+}
+
+.letter.black,
+.letter.green,
+.letter.orange,
+.letter.grey {
+  position: absolute;
+  width: 95%;
+  height: 95%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.letter.green {
+  border: 2px solid green;
   background-color: green;
-  border-color: green;
 }
 
-.tile.grey.flipped {
-  transform: rotateX(180deg);
+.letter.orange {
+  border: 2px solid #cc8400;
+
+  background-color: #cc8400;
+}
+
+.letter.grey {
+  border: 2px solid #403c3c;
   background-color: #403c3c;
 }
 
-.tile.orange.flipped {
+.letter.black {
+  border: 2px solid #403c3c;
+  background-color: #242424;
   transform: rotateX(180deg);
-  background-color: #cc8400;
-  border-color: #cc8400;
+}
+
+span {
+  position: relative;
+  bottom: 2px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
 }
