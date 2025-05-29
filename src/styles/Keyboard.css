@@ -1,0 +1,35 @@
+.keyboard {
+  width: 100%;
+}
+
+.keyboard-key {
+  height: 50px;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 3px;
+}
+
+.keyboard-key.letter {
+  width: 40px;
+  background-color: #808080;
+}
+
+.keyboard-key.enter {
+  position: relative;
+  bottom: 3px;
+  background-color: #1a1a1a;
+  font-size: 0.8em;
+  width: 80px;
+}
+
+.keyboard-key.backspace {
+  background-color: #1a1a1a;
+  font-size: 0.8em;
+  width: 100px;
+  position: relative;
+  bottom: 3px;
+}
+
+.row {
+  display: flex;
+}

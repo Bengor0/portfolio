@@ -25,6 +25,9 @@ export default function App() {
     guess.current = ["", BASE_COLORS];
     setGuesses(new Array(NUM_OF_GUESSES).fill(["", BASE_COLORS]));
     rowIndex.current = 0;
+    document
+      .querySelectorAll(".keyboard-key.letter")
+      .forEach((element) => (element.style.backgroundColor = "#808080"));
     toggleIsGameOver();
     wordSet.current = new Set();
     setMessage(<p className="message"></p>);
@@ -33,7 +36,7 @@ export default function App() {
 
   const delay = (ms) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  };
 
   useEffect(() => {
     const fetchWords = async () => {
@@ -60,6 +63,14 @@ export default function App() {
     setGuesses(shallowGuesses);
   };
 
+  const udpateKeyColor = (i, color) => {
+    setTimeout(() => {
+      document.getElementById(`${guess.current[0][i]}`).style.backgroundColor =
+        color;
+    }, 2200);
+    console.log("hello");
+  };
+
   const checkGuess = () => {
     const colors = [];
     let correctCount = 0;
@@ -67,10 +78,15 @@ export default function App() {
     for (let i = 0; i < WORD_LENGTH; i++) {
       if (guess.current[0][i] === solution.current[i]) {
         colors.push("green");
+        udpateKeyColor(i, "green");
         correctCount++;
       } else if (solution.current.includes(guess.current[0][i])) {
         colors.push("orange");
-      } else colors.push("grey");
+        udpateKeyColor(i, "#cc8400");
+      } else {
+        colors.push("grey");
+        udpateKeyColor(i, "#403c3c");
+      }
     }
 
     if (correctCount === WORD_LENGTH) {
@@ -83,45 +99,45 @@ export default function App() {
   };
 
   const handleKeyClick = (event) => {
-    handleKey(event.target.textContent);
-  }
+    handleKey(event.target.id);
+  };
 
   const handleKey = async (key) => {
-      if (!isGameOver) {
-        if (key === "ENTER" && guess.current[0].length === WORD_LENGTH) {
-          if (wordSet.current.has(guess.current[0])) {
-            checkGuess();
-            await delay(2200);
-            rowIndex.current = rowIndex.current + 1;
-            guess.current = ["", BASE_COLORS];
-            if (rowIndex.current >= NUM_OF_GUESSES) {
-              toggleIsGameOver();
-              return;
-            }
-          } else {
-            setMessage(<Message message={"Not in the word bank!"} />);
+    if (!isGameOver) {
+      if (key === "ENTER" && guess.current[0].length === WORD_LENGTH) {
+        if (wordSet.current.has(guess.current[0])) {
+          checkGuess();
+          await delay(2200);
+          rowIndex.current = rowIndex.current + 1;
+          guess.current = ["", BASE_COLORS];
+          if (rowIndex.current >= NUM_OF_GUESSES) {
+            toggleIsGameOver();
             return;
           }
-        } else if (rowIndex.current < NUM_OF_GUESSES) {
-          if (key === "BACKSPACE" && guess.current[0].length > 0) {
-            guess.current[0] = guess.current[0].slice(0, -1);
-            updateGuesses(guess.current);
-          } else if (
-            /[A-Z]/.test(key) &&
-            key.length === 1 &&
-            guess.current[0].length < WORD_LENGTH
-          ) {
-            guess.current[0] = guess.current[0] + key.toUpperCase();
-            updateGuesses(guess.current);
-          } else return;
+        } else {
+          setMessage(<Message message={"Not in the word bank!"} />);
+          return;
         }
-      } else return;
-    };
+      } else if (rowIndex.current < NUM_OF_GUESSES) {
+        if (key === "BACKSPACE" && guess.current[0].length > 0) {
+          guess.current[0] = guess.current[0].slice(0, -1);
+          updateGuesses(guess.current);
+        } else if (
+          /[A-Z]/.test(key) &&
+          key.length === 1 &&
+          guess.current[0].length < WORD_LENGTH
+        ) {
+          guess.current[0] = guess.current[0] + key.toUpperCase();
+          updateGuesses(guess.current);
+        } else return;
+      }
+    } else return;
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       handleKey(event.key.toUpperCase());
-    }
+    };
 
     window.addEventListener("keydown", handleKeyDown);
 
@@ -130,11 +146,14 @@ export default function App() {
 
   return (
     <>
-      {guesses.map((guess, i) => {
-        return <Row guess={guess} key={i} />;
-      })}
-      {isGameOver && <button onClick={restartGame}>Play again</button>}
-      <KeyBoard handleKeyClick={handleKeyClick}/>
+      <div className="board">
+        {guesses.map((guess, i) => {
+          return <Row guess={guess} key={i} />;
+        })}
+      </div>
+      <div className="bottom-container">
+        {isGameOver ? <button className="restart-button" onClick={restartGame}>Play again</button> : <KeyBoard handleKeyClick={handleKeyClick} />}
+      </div>
     </>
   );
 }
