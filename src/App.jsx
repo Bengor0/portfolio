@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect } from "react";
-import './App.css';
+import { useRef, useState, useEffect, createContext } from "react";
+import useToggleState from "./hooks/useToggleState";
+import KeyBoard from "./components/KeyBoard";
+import "./App.css";
 
 const API_URL = "https://cheaderthecoder.github.io/5-Letter-words/words.json";
 const WORD_LENGTH = 5;
@@ -13,20 +15,25 @@ export default function App() {
     new Array(NUM_OF_GUESSES).fill(["", BASE_COLORS])
   );
   const rowIndex = useRef(0);
-  const isGameOver = useRef(false);
-  const restart = useRef(false);
+  const [isGameOver, toggleIsGameOver] = useToggleState(false);
+  const [restart, toggleRestart] = useToggleState(false);
   const wordSet = useRef(new Set());
   const [message, setMessage] = useState(<p className="message">----</p>);
+  const KeyboardContext = createContext();
 
   const restartGame = () => {
     guess.current = ["", BASE_COLORS];
     setGuesses(new Array(NUM_OF_GUESSES).fill(["", BASE_COLORS]));
     rowIndex.current = 0;
-    isGameOver.current = false;
+    toggleIsGameOver();
     wordSet.current = new Set();
     setMessage(<p className="message"></p>);
-    restart.current = !restart.current;
+    toggleRestart();
   };
+
+  const delay = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
   useEffect(() => {
     const fetchWords = async () => {
@@ -45,7 +52,7 @@ export default function App() {
     };
 
     fetchWords();
-  }, [restart.current]);
+  }, [restart]);
 
   const updateGuesses = () => {
     const shallowGuesses = [...guesses];
@@ -68,23 +75,27 @@ export default function App() {
 
     if (correctCount === WORD_LENGTH) {
       setMessage(<Message message={"Correct!"} />);
-      isGameOver.current = true;
+      toggleIsGameOver();
     } else setMessage(<Message message={"Try again."} />);
 
     guess.current = [guess.current[0], colors];
     updateGuesses();
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (!isGameOver.current) {
-        if (event.key === "Enter" && guess.current[0].length === WORD_LENGTH) {
+  const handleKeyClick = (event) => {
+    handleKey(event.target.textContent);
+  }
+
+  const handleKey = async (key) => {
+      if (!isGameOver) {
+        if (key === "ENTER" && guess.current[0].length === WORD_LENGTH) {
           if (wordSet.current.has(guess.current[0])) {
             checkGuess();
+            await delay(2200);
             rowIndex.current = rowIndex.current + 1;
             guess.current = ["", BASE_COLORS];
             if (rowIndex.current >= NUM_OF_GUESSES) {
-              isGameOver.current = true;
+              toggleIsGameOver();
               return;
             }
           } else {
@@ -92,20 +103,25 @@ export default function App() {
             return;
           }
         } else if (rowIndex.current < NUM_OF_GUESSES) {
-          if (event.key === "Backspace" && guess.current[0].length > 0) {
+          if (key === "BACKSPACE" && guess.current[0].length > 0) {
             guess.current[0] = guess.current[0].slice(0, -1);
             updateGuesses(guess.current);
           } else if (
-            /[a-zA-Z]/.test(event.key) &&
-            event.key.length === 1 &&
+            /[A-Z]/.test(key) &&
+            key.length === 1 &&
             guess.current[0].length < WORD_LENGTH
           ) {
-            guess.current[0] = guess.current[0] + event.key.toUpperCase();
+            guess.current[0] = guess.current[0] + key.toUpperCase();
             updateGuesses(guess.current);
           } else return;
         }
       } else return;
     };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      handleKey(event.key.toUpperCase());
+    }
 
     window.addEventListener("keydown", handleKeyDown);
 
@@ -114,11 +130,11 @@ export default function App() {
 
   return (
     <>
-      {message}
       {guesses.map((guess, i) => {
         return <Row guess={guess} key={i} />;
       })}
-      {isGameOver.current === true && <button onClick={restartGame}>Play again</button>}
+      {isGameOver && <button onClick={restartGame}>Play again</button>}
+      <KeyBoard handleKeyClick={handleKeyClick}/>
     </>
   );
 }
@@ -132,12 +148,12 @@ function Row({ guess }) {
     let spanClassName = `letter ${guess[1][i]}`;
 
     tiles.push(
-      <div className={tileClassName} key={i} style={{"--index" : i}}>
-        <div className="tile-inner" style={{"--index" : i}}>
-          <div className="letter black" style={{"--index" : i}}>
+      <div className={tileClassName} key={i} style={{ "--index": i }}>
+        <div className="tile-inner" style={{ "--index": i }}>
+          <div className="letter black" style={{ "--index": i }}>
             <span>{char}</span>
           </div>
-          <div className={spanClassName} style={{"--index" : i}}>
+          <div className={spanClassName} style={{ "--index": i }}>
             <span>{char}</span>
           </div>
         </div>
